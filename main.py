@@ -20,6 +20,7 @@ def play_game():
     past_intro = False
     #decisions made across the game
     has_answered_doorbell = False
+    interest_in_cookies = False
     let_her_in = False
     look_at_cookies = False
     #for killing, needs to check inventory
@@ -75,7 +76,7 @@ You notice your old plunger by the toilet.""", 90),
         else:
             print("Thank you for playing!") 
 
-    def strict_input(current_room, has_answered_doorbell, let_her_in, look_at_cookies):
+    def strict_input(current_room, has_answered_doorbell, interest_in_cookies, let_her_in, look_at_cookies):
         nonlocal action 
         nonlocal inventory
         nonlocal past_intro
@@ -85,7 +86,8 @@ You notice your old plunger by the toilet.""", 90),
         #set of all approved actions at a moment depending on what choices you've made so far
         #really only matters for intro and murdering options
         if has_answered_doorbell == True:
-            #question is asking: can I come in?
+            poss_actions = ["yes", "no"]
+        if interest_in_cookies == True:
             poss_actions = ["let her in", "say no"]
         if let_her_in == True:
             #she is in the house
@@ -95,25 +97,37 @@ You notice your old plunger by the toilet.""", 90),
             #you don't lean in, and she doesn't kill you
             #so you get to go on to the next actions
             pass
-        if current_room == "plant":
-            late_game_poss_actions = ["living", "living room", "uv", "light", "uv light", "lights"]
+        if current_room == "living room":
+            late_game_poss_actions = ["plant", "plant room", "bathroom", "kitchen"]
+        elif current_room == "plant":
+            late_game_poss_actions = ["living", "living room", "uv", "light", "uv light", "lights", "take the light", "take the lights"]
         elif current_room == "bathroom":
-            late_game_poss_actions = ["living", "living room", "plunger"]
+            late_game_poss_actions = ["living", "living room", "plunger", "take the plunger"]
         elif current_room == "kitchen":
-            late_game_poss_actions = ["living", "living room", "garlic", "chicken parm"]
+            late_game_poss_actions = ["living", "living room", "garlic", "chicken parm", "take the garlic", "take the chicken parm"]
         #second part of the game actions    
         if current_room == "door" and "garlic" in inventory:
             late_game_poss_actions.append("use garlic")
+            late_game_poss_actions.append("use the garlic")
+            late_game_poss_actions.append("throw the garlic")
+            late_game_poss_actions.append("attack with garlic")
         if current_room == "door" and "stake" in inventory:
             late_game_poss_actions.append("use stake")
+            late_game_poss_actions.append("use the stake")
+            late_game_poss_actions.append("stab with stake")
+            late_game_poss_actions.append("attack with stake")
+            late_game_poss_actions.append("impale with stake")
         if current_room == "door" and "UV lights" in inventory:
             late_game_poss_actions.append("shine lights")
+            late_game_poss_actions.append("shine the lights")
             late_game_poss_actions.append("shine uv lights")
+            late_game_poss_actions.append("shine the uv lights")
             late_game_poss_actions.append("use lights")
+            late_game_poss_actions.append("use the lights")
 
-        if action not in poss_actions and past_intro == False:
+        if action not in poss_actions and not past_intro:
             print("I don't understand that action.")
-        elif action not in late_game_poss_actions:
+        elif past_intro and action not in late_game_poss_actions:
             print("What did you want to do?")
 
     while game_on:
@@ -137,7 +151,7 @@ As time slips by, the news starts covering yet another vampire attack.\n""")
         
         #prompt for actions
         else:
-            strict_input(current_room, has_answered_doorbell, let_her_in, look_at_cookies)
+            strict_input(current_room, has_answered_doorbell, interest_in_cookies, let_her_in, look_at_cookies)
         
         #end game
         if action in ["quit", "exit"]:
@@ -162,6 +176,7 @@ As time slips by, the news starts covering yet another vampire attack.\n""")
             go_living()
             #things you can do in this room: greet girl scout, look in mirror
             if action == "yes" and has_answered_doorbell:
+                interest_in_cookies = True
                 rooms["door"]["description"] = """"Great!" she exclaims, "We're donating the proceeds to the local hospital. 
 We're also going to be running a blood drive next month!"
 
@@ -171,6 +186,7 @@ Just as you think that, the Girl Scout echos your sentiments.
 "Geez, it sure is cold out here. Could I come in?" 
 You could LET HER IN or SAY NO."""
             elif action == "no" and has_answered_doorbell:
+                interest_in_cookies = True
                 rooms["door"]["description"] = """"Aw man, are you sure? We're donating the proceeds to the local hospital, and we're also
 running a blood drive next month!" She looks like a kicked puppy, and now you feel bad. Maybe you'll just buy
 a box.
@@ -251,7 +267,7 @@ No blood comes from her body, since vampires don't bleed. But now you have a cor
                 print("In the stories, vampires are weak to garlic. Good thinking.")
                 rooms["kitchen"]["description"] = """You are in your kitchen. Your famous garlic chicken parm lies on the counter."""
             elif "chicken parm" in action:
-                print("I don't think vampires can eat human food. Besides, why would you waste your food like that?")
+                print("I don't think you have time for that right now.")
         elif current_room == "bathroom":
             go_living()
             #things you can do in this room: get plunger
